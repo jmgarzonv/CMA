@@ -1,6 +1,6 @@
 # Tests
 import unittest
-from cont_mem_algos import best_fit
+from best_fit import best_fit
 
 class TestBasicFirstFit(unittest.TestCase):
 

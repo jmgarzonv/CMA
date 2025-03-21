@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import click
-from cont_mem_algos import first_fit, best_fit, worst_fit
+import sys
+from best_fit import best_fit
+
 
 def print_memory_map(memory_map):
     for memory in memory_map:
@@ -35,34 +37,20 @@ def read_memmap_file(memmap_filename):
 def cmas(algo_str):
     if algo_str == 'all':
         return [
-            {"name" : "First fit",
-             "function" : first_fit },
-            {"name" : "Best fit",
+            {"name" : "best fit",
              "function" : best_fit },
-            {"name" : "Worst fit",
-             "function" : worst_fit},
-        ]
-    elif algo_str == 'first':
-        return [
-            {"name" : "First fit",
-             "function" : first_fit },
         ]
     elif algo_str == 'best':
         return [
-            {"name" : "Best fit",
+            {"name" : "best fit",
              "function" : best_fit },
-        ]
-    elif algo_str == 'worst':
-        return [
-            {"name" : "First fit",
-             "function" : first_fit },
-            {"name" : "Best fit",
-             "function" : best_fit },
-            {"name" : "Worst fit",
-             "function" : worst_fit},
         ]
     else:
         return None
+    
+def bytes_to_mb(bytes_value: int) -> str:
+    return f"{bytes_value / (1024 * 1024):.2f} MB"
+
 
 @click.command()
 @click.option('--memmap', help='file with the memory description')
@@ -88,12 +76,20 @@ def process(memmap, reqs, function, pos):
         print_memory_map(work_memory)
         
         for req in requirements:
+            print(f"\nProcesando requerimiento: {req:#0{8}x} ({bytes_to_mb(req)} en MB)")              
             search = cmae["function"](work_memory, req, index)
             
             if search == None:
-                print(f"Not found: {req:#0{8}x}")
+                print(f"Not found: {req:#0{8}x} ({bytes_to_mb(req)} en MB)")     
+                       
             else:
-                print(f"Assigned to the process base: {search[1]:#0{8}x} limit: {search[2]:#{8}x}")
+
+                base_hex = f"{search[1]:#0{8}x}"
+                base_mb = bytes_to_mb(search[1])
+                limit_hex = f"{search[2]:#0{8}x}"
+                limit_mb = bytes_to_mb(search[2])
+
+                print(f"Assigned to the process base: {base_hex} ({base_mb}) | limit: {limit_hex} ({limit_mb})")
                 print(f"Index: {search[3]}")
                 print_memory_map(search[0])
                 index = search[3]
