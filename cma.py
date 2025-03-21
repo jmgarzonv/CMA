@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import click
 import sys
+from typing import List, Tuple, Optional, Union
 from best_fit import best_fit
-
 
 def print_memory_map(memory_map):
     for memory in memory_map:
@@ -47,10 +47,9 @@ def cmas(algo_str):
         ]
     else:
         return None
-    
+
 def bytes_to_mb(bytes_value: int) -> str:
     return f"{bytes_value / (1024 * 1024):.2f} MB"
-
 
 @click.command()
 @click.option('--memmap', help='file with the memory description')
@@ -65,34 +64,26 @@ def process(memmap, reqs, function, pos):
         return
 
     first_pos = pos
-    
-    work_memory = memory[:]
+    work_memory = memory[:]  # La memoria inicial se carga aquí y se actualiza después
 
     for cmae in cont_mem_algo:
-
-        work_memory = memory[:]
         index = first_pos
         print(cmae["name"])
         print_memory_map(work_memory)
-        
+
         for req in requirements:
-            print(f"\nProcesando requerimiento: {req:#0{8}x} ({bytes_to_mb(req)} en MB)")              
+            print(f"\nEvaluando requerimiento: {hex(req)} ({bytes_to_mb(req)})")
             search = cmae["function"](work_memory, req, index)
-            
-            if search == None:
-                print(f"Not found: {req:#0{8}x} ({bytes_to_mb(req)} en MB)")     
-                       
+            if search is None:
+                print(f"No se pudo asignar el requerimiento {hex(req)}.")
             else:
-
-                base_hex = f"{search[1]:#0{8}x}"
-                base_mb = bytes_to_mb(search[1])
-                limit_hex = f"{search[2]:#0{8}x}"
-                limit_mb = bytes_to_mb(search[2])
-
-                print(f"Assigned to the process base: {base_hex} ({base_mb}) | limit: {limit_hex} ({limit_mb})")
-                print(f"Index: {search[3]}")
-                print_memory_map(search[0])
-                index = search[3]
+                work_memory, base, limit, index = search  # Actualizar work_memory con la memoria restante
+                print("Asignación exitosa:")
+                print(f"  - Base asignada: {hex(base)}")
+                print(f"  - Límite asignado (Tamaño): {hex(limit)} ({bytes_to_mb(limit)})")
+                print(f"  - Índice de la asignación: {index}")
+                print(f"  - Memoria restante:")
+                print_memory_map(work_memory)
 
 if __name__ == '__main__':
     process()

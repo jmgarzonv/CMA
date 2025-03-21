@@ -1,26 +1,21 @@
 from typing import List, Tuple, Optional, Union
 
-
 def best_fit(mem_avail: List[Tuple[int, int]], req: Union[int, List[int]], index: int) -> Optional[Tuple[List[Tuple[int, int]], int, int, int]]:
-    # Verificación si la memoria está vacía
-    if not mem_avail:
-        return None  # No hay memoria disponible para asignar
-    
-    # Si el requerimiento es una lista de enteros, lo procesamos uno por uno
-    if isinstance(req, list):
+    if not mem_avail:  # Si la memoria está vacía
+        return None
+
+    if isinstance(req, list):  # Procesar lista de requerimientos
         for single_req in req:
             result = best_fit(mem_avail, single_req, index)
             if result is None:
-                return None  # Si algún requerimiento no puede ser asignado, retorna None
-            mem_avail, base, _, index = result  # Actualizamos la memoria y continuamos con el siguiente requerimiento
-        return (mem_avail, base, req[-1], index)  # Devuelve el último bloque asignado de la lista
+                return None
+            mem_avail, base, _, index = result
+        return (mem_avail, base, req[-1], index)
 
-    # Índice circular
     index %= len(mem_avail)
     mejor_bloque = None
     mejor_indice = -1
 
-    # Recorremos la lista desde el índice especificado
     for i in range(len(mem_avail)):
         actual_index = (index + i) % len(mem_avail)
         base, limite = mem_avail[actual_index]
@@ -39,9 +34,9 @@ def best_fit(mem_avail: List[Tuple[int, int]], req: Union[int, List[int]], index
 
     nueva_mem_avail = mem_avail.copy()
 
-    if nuevo_limite == 0:  # Si el bloque se consumió completamente
+    if nuevo_limite == 0:
         nueva_mem_avail.pop(mejor_indice)
-    else:  # Actualizamos el bloque con el nuevo tamaño
+    else:
         nueva_mem_avail[mejor_indice] = (nuevo_base, nuevo_limite)
 
     return (nueva_mem_avail, base, req, mejor_indice)
